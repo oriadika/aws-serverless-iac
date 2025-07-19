@@ -1,0 +1,27 @@
+name: Lint & Audit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          cd cdk
+          npm ci
+
+      - name: Run ESLint
+        run: |
+          cd cdk
+          npm run lint
+
+      - name: Run npm audit
+        run: |
+          cd cdk
+          npm audit --audit-level=moderate
