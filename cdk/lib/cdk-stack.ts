@@ -1,6 +1,8 @@
 import * as cdk      from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-
+import { Bucket } from 'aws-cdk-lib/aws-s3';
+import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
+import * as path from 'path';
 import * as s3       from 'aws-cdk-lib/aws-s3';
 import * as sns      from 'aws-cdk-lib/aws-sns';
 import * as subs     from 'aws-cdk-lib/aws-sns-subscriptions';

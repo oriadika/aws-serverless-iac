@@ -104,6 +104,23 @@ Follow these steps to deploy the application:
 
 ## 5. Manual Testing
 
+### 5.1 Verify S3 Bucket Contents
+
+To confirm that `local-files/` was automatically deployed to S3, run:
+
+```bash
+aws s3 ls "s3://$(aws cloudformation describe-stacks \
+  --stack-name CdkStack \
+  --region us-east-1 \
+  --query \"Stacks[0].Outputs[?OutputKey=='BucketName'].OutputValue\" \
+  --output text)/" \
+  --region us-east-1
+```
+
+You should see your sample file(s), e.g.: `hello.txt`.
+
+### 5.2 Lambda Manual Testing
+
 To verify the Lambda function independently:
 
 1. **Obtain the function name**
@@ -129,16 +146,14 @@ To verify the Lambda function independently:
 
    ```bash
    cat response.json
-   # Expected format:
+   # Expected:
    # {"message":"Bucket \"<BucketName>\" contains: hello.txt"}
    ```
 
-4. **Check email**\
-   Verify receipt of the SNS notification with the same message.
+4. **Check email**
+   Confirm receipt of the SNS notification with the same message.
 
----
-
-## 6. Continuous Integration / Continuous Deployment
+## 6. Continuous Integration / Continuous Deployment Continuous Integration / Continuous Deployment
 
 This repository uses GitHub Actions to automate deployments.
 
@@ -159,7 +174,87 @@ The workflow will checkout the code, install dependencies, bootstrap, and deploy
 
 ---
 
-## 7. Cleanup
+## 7. Testing the Deployment
+
+After your stack is deployed and the SNS subscription is confirmed, verify each component as follows:
+
+1. **Confirm S3 Bucket and File Upload**  
+   ```bash
+   aws s3 ls "s3://<YourBucketName>/" --region us-east-1
+   ```
+   - Expect to see all files from `local-files/`, e.g. `hello.txt`.
+
+2. **Validate IAM Role Permissions**  
+   - In the AWS Console → **IAM** → **Roles**, find the Lambda execution role.  
+   - Ensure the attached policies grant only:
+     - `s3:GetBucket*`, `s3:List*`, `s3:GetObject*` on `arn:aws:s3:::<YourBucketName>/*`  
+     - `sns:Publish` on `<YourTopicArn>`  
+     - `AWSLambdaBasicExecutionRole` for logs.
+
+3. **Check SNS Subscription Status**  
+   ```bash
+   aws sns list-subscriptions-by-topic \
+     --topic-arn "<YourTopicArn>" \
+     --region us-east-1 --output table
+   ```
+   - Confirm your email shows a real `SubscriptionArn`, not `PendingConfirmation`.
+
+4. **Manually Invoke the Lambda Function**  
+   ```bash
+   FUNCTION_NAME=$(aws lambda list-functions \
+     --region us-east-1 \
+     --query "Functions[?starts_with(FunctionName,'CdkStack-ListAndNotifyHandler')].FunctionName" \
+     --output text)
+
+   aws lambda invoke \
+     --region us-east-1 \
+     --function-name $FUNCTION_NAME \
+     --payload '{}' response.json
+
+   cat response.json
+   # Expect: {"message":"Bucket \"<YourBucketName>\" contains: hello.txt"}
+   ```
+   - Verify you receive an SNS email with the same message.
+
+5. **Review Lambda Logs (Optional)**  
+   ```bash
+   aws logs tail "/aws/lambda/$FUNCTION_NAME" --region us-east-1 --since 5m
+   ```
+   - Ensure there are no errors and that the listing operation logged successfully.
+
+6. **Run GitHub Actions Pipeline**  
+   - Edit any file (e.g., add a space in README), commit, and push to `main`.  
+   - On GitHub, trigger the **CDK Deploy** workflow.  
+   - After the run succeeds, repeat steps 1–4 to confirm the CI/CD deployment matched the manual one.
+
+7. **Verify Auto-Delete Custom Resource**  
+   - Upload a test file via the S3 Console to `<YourBucketName>`.  
+   - Delete and redeploy (or update) the stack.  
+   - Confirm the custom resource cleans up older objects automatically when the stack is destroyed.
+
+---
+
+## 8. Cleanup
+
+To remove all resources and prevent charges:
+
+```bash
+cd aws-serverless-iac/cdk
+cdk destroy --force
+```
+
+---
+
+## 9. Technologies Used
+
+- AWS CDK (v2) with TypeScript
+- AWS CLI (v2)
+- Node.js & npm
+- GitHub Actions
+
+---
+
+*Ori Adika – 209200559*
 
 To remove all resources and prevent ongoing charges:
 

@@ -10,11 +10,11 @@
     "lib": "lib",
     "test": "test"
   },
-"scripts": {
-  "build": "tsc",
-  "watch": "tsc -w",
-  "cdk": "cdk"
-},
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "cdk": "cdk"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
