@@ -1,58 +1,63 @@
-# AWS Serverless IaC Demo
+# AWS Serverless Infrastructure as Code
 
-**Author:** Ori Adika – 209200559 **GitHub:** [https://github.com/oriadika/aws-serverless-iac](https://github.com/oriadika/aws-serverless-iac)
-
----
-
-## 📦 Project Overview
-
-This repository contains a production‑grade, fully automated serverless application on AWS, deployed and managed via Infrastructure as Code (IaC) with the AWS CDK (TypeScript). On each deployment, the app will:
-
-1. **Upload** all files from `local-files/` to an S3 bucket.
-2. **Execute** a Lambda function that lists *all* objects in that bucket.
-3. **Publish** the object list to an SNS topic, sending an email notification.
-4. Support **manual invocation** of the Lambda for ad‑hoc testing.
+**Author:** Ori Adika (209200559)\
+**Repository:** [https://github.com/oriadika/aws-serverless-iac](https://github.com/oriadika/aws-serverless-iac)
 
 ---
 
-## 🔧 Prerequisites
+## 1. Introduction
 
-- AWS account with an IAM user (programmatic access).
-- AWS CLI v2 installed and configured (`aws configure`).
-- Node.js ≥ 14.x & npm.
-- Python ≥ 3.9.
-- AWS CDK CLI (`npm install -g aws-cdk`).
-- Git & a GitHub account.
+This project demonstrates a fully automated serverless application on AWS, provisioned and managed through Infrastructure as Code (IaC) with the AWS Cloud Development Kit (CDK) in TypeScript. Each deployment performs the following:
 
-> **Region:** This guide assumes **us‑east‑1**. If you use a different region, adjust commands accordingly.
+- Uploads all files from the `local-files/` directory to an Amazon S3 bucket.
+- Executes an AWS Lambda function that lists all objects in the bucket.
+- Publishes the object list to an Amazon SNS topic, sending an email notification.
+- Supports manual invocation of the Lambda function for testing.
+
+This setup is ideal for production environments, with minimal manual configuration.
 
 ---
 
-## 📁 Repository Structure
+## 2. Prerequisites
 
-```
+Before you begin, ensure you have the following installed and configured:
+
+- **AWS Account** with an IAM user (programmatic access)
+- **AWS CLI v2** (configured via `aws configure`)
+- **Node.js** (v14 or later) and **npm**
+- **Python** (v3.9 or later)
+- **AWS CDK CLI** (`npm install -g aws-cdk`)
+- **Git** and a **GitHub** account
+
+> **Note:** This guide assumes the AWS region `us-east-1`. For a different region, append `--region <your-region>` to AWS CLI commands.
+
+---
+
+## 3. Repository Layout
+
+```text
 aws-serverless-iac/
-├── cdk/               # CDK app (TypeScript)
-│   ├── bin/           # CDK entrypoint script
+├── cdk/               # CDK application (TypeScript)
+│   ├── bin/           # CDK entrypoint
 │   ├── lib/           # Stack definitions
-│   ├── tsconfig.json  # TypeScript config
-│   └── package.json   # CDK dependencies & build scripts
-├── lambda/            # Lambda function code
-│   ├── index.js       # Handler (Node.js)
+│   ├── tsconfig.json  # TypeScript configuration
+│   └── package.json   # Dependencies and build scripts
+├── lambda/            # Lambda function code (Node.js)
+│   ├── index.js       # Handler implementation
 │   ├── package.json   # Lambda dependencies
 │   └── package-lock.json
-├── local-files/       # Sample files to upload to S3
-│   └── hello.txt      # Example file
+├── local-files/       # Files uploaded to S3 on deployment
+│   └── hello.txt      # Sample file
 └── .github/
     └── workflows/
-        └── deploy.yml # GitHub Actions CI/CD pipeline
+        └── deploy.yml # GitHub Actions workflow for CI/CD
 ```
 
 ---
 
-## 🚀 Setup & Deployment
+## 4. Deployment Steps
 
-Follow these steps to deploy the entire stack:
+Follow these steps to deploy the application:
 
 1. **Clone the repository**
 
@@ -68,97 +73,95 @@ Follow these steps to deploy the entire stack:
    npm install
    ```
 
-3. **Install CDK app dependencies**
+3. **Install CDK dependencies**
 
    ```bash
    cd ../cdk
    npm install
    ```
 
-4. **Compile the CDK TypeScript code**
+4. **Compile the CDK application**
 
    ```bash
    npm run build
    ```
 
-5. **Bootstrap your AWS environment**
+5. **Bootstrap the AWS environment**
 
    ```bash
-   cdk bootstrap \  
-     aws://$(aws sts get-caller-identity --query Account --output text)/us-east-1
+   cdk bootstrap aws://$(aws sts get-caller-identity --query Account --output text)/us-east-1
    ```
 
-6. **Deploy the stack**
+6. **Deploy the CDK stack**
 
    ```bash
    cdk deploy --require-approval never
    ```
 
-   - An SNS **Subscription Confirmation** email will arrive—in your inbox, **click the link** to activate notifications.
+   After deployment, confirm the SNS subscription in your email to enable notifications.
 
 ---
 
-## 🔍 Manual Lambda Test
+## 5. Manual Testing
 
-Execute an on‑demand test of your Lambda function:
+To verify the Lambda function independently:
 
-1. **Retrieve the function name**
+1. **Obtain the function name**
 
    ```bash
-   FUNCTION_NAME=$(aws lambda list-functions \  
-     --region us-east-1 \  
-     --query "Functions[?starts_with(FunctionName,'CdkStack-ListAndNotifyHandler')].FunctionName" \  
-     --output text)
-   echo $FUNCTION_NAME
+   aws lambda list-functions \
+     --region us-east-1 \
+     --query "Functions[?starts_with(FunctionName, 'CdkStack-ListAndNotifyHandler')].FunctionName" \
+     --output text
    ```
 
-2. **Invoke the function**
+2. **Invoke the Lambda**
 
    ```bash
-   aws lambda invoke \  
-     --region us-east-1 \  
-     --function-name $FUNCTION_NAME \  
-     --payload '{}' \  
+   aws lambda invoke \
+     --region us-east-1 \
+     --function-name <FunctionName> \
+     --payload '{}' \
      response.json
    ```
 
-3. **View the invocation result**
+3. **Examine the response**
 
    ```bash
    cat response.json
-   # → {"message":"Bucket \"<YourBucketName>\" contains: hello.txt"}
+   # Expected format:
+   # {"message":"Bucket \"<BucketName>\" contains: hello.txt"}
    ```
 
-4. **Verify email notification**
-
-   - An SNS email with the same message should arrive in your inbox.
+4. **Check email**\
+   Verify receipt of the SNS notification with the same message.
 
 ---
 
-## 🤖 CI/CD with GitHub Actions
+## 6. Continuous Integration / Continuous Deployment
 
-Automate deployments via GitHub Actions:
+This repository uses GitHub Actions to automate deployments.
 
-1. **Workflow file location**: `.github/workflows/deploy.yml`
-2. **Configure Secrets** in GitHub Settings → Secrets → Actions:
+1. **Workflow file**: `.github/workflows/deploy.yml`
+
+2. **Configure repository secrets** (Settings → Secrets → Actions):
+
    - `AWS_ACCESS_KEY_ID`
    - `AWS_SECRET_ACCESS_KEY`
    - `AWS_REGION` (e.g., `us-east-1`)
-3. **Run the workflow**:
-   - Go to the **Actions** tab → **CDK Deploy** → **Run workflow**
 
-The pipeline will:
+3. **Trigger the workflow**:
 
-- Checkout code
-- Install dependencies
-- Bootstrap (if required)
-- Deploy the CDK stack
+   - Navigate to the Actions tab in GitHub
+   - Select **CDK Deploy** → **Run workflow**
+
+The workflow will checkout the code, install dependencies, bootstrap, and deploy the stack.
 
 ---
 
-## 🧹 Tear‑down (Cleanup)
+## 7. Cleanup
 
-Remove all AWS resources to avoid charges:
+To remove all resources and prevent ongoing charges:
 
 ```bash
 cd aws-serverless-iac/cdk
@@ -167,12 +170,12 @@ cdk destroy --force
 
 ---
 
-## 🛠️ Tools & Frameworks
+## 8. Technologies Used
 
-- **AWS CDK** (v2, TypeScript)
-- **AWS CLI** (v2)
-- **Node.js** & **npm**
-- **GitHub Actions**
+- AWS CDK (v2) with TypeScript
+- AWS CLI (v2)
+- Node.js & npm
+- GitHub Actions
 
 ---
 
