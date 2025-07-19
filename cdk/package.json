@@ -13,7 +13,7 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "cdk": "cdk"
+    "cdk": "cdk",
     "lint": "eslint 'lib/**/*.ts'",
     "format": "prettier --write 'lib/**/*.ts'"
   },
