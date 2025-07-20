@@ -2,7 +2,7 @@
   "name": "cdk",
   "version": "1.0.0",
   "type": "module",
-  "description": "This is a blank project for CDK development with TypeScript.",
+  "description": "AWS CDK stack for serverless S3 + SNS + Lambda demo",
   "main": "jest.config.js",
   "bin": {
     "cdk": "bin/cdk.js"
@@ -15,22 +15,28 @@
     "build": "tsc",
     "watch": "tsc -w",
     "cdk": "cdk",
-    "lint": "eslint \"lib/**/*.ts\"",
-    "format": "prettier --write \"lib/**/*.ts\""
+    "lint": "eslint lib bin",
+    "format": "prettier --write \"lib/**/*.ts\"",
+    "test": "jest --passWithNoTests"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "aws",
+    "cdk",
+    "serverless",
+    "typescript"
+  ],
+  "author": "Ori Adika <oriadika10@gmail.com>",
+  "license": "MIT",
   "dependencies": {
-    "@aws-cdk/aws-s3-deployment": "^1.203.0",
     "aws-cdk-lib": "^2.206.0",
-    "constructs": "^10.4.2"
+    "constructs": "^10.4.2",
+    "@aws-cdk/aws-s3-deployment": "^1.203.0"
   },
   "devDependencies": {
-    "@types/jest": "^30.0.0",
-    "@types/node": "^24.0.15",
     "@typescript-eslint/eslint-plugin": "^8.37.0",
     "@typescript-eslint/parser": "^8.37.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.0.15",
     "eslint": "^9.31.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.3",
