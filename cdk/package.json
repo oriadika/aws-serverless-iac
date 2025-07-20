@@ -1,6 +1,7 @@
 {
   "name": "cdk",
   "version": "1.0.0",
+  "type": "module",
   "description": "This is a blank project for CDK development with TypeScript.",
   "main": "jest.config.js",
   "bin": {
