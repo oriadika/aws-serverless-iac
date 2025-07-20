@@ -256,12 +256,6 @@ cdk destroy --force
 
 *Ori Adika – 209200559*
 
-To remove all resources and prevent ongoing charges:
-
-```bash
-cd aws-serverless-iac/cdk
-cdk destroy --force
-```
 
 ---
 
