@@ -265,14 +265,4 @@ cdk destroy --force
 
 ---
 
-## 8. Technologies Used
-
-- AWS CDK (v2) with TypeScript
-- AWS CLI (v2)
-- Node.js & npm
-- GitHub Actions
-
----
-
-*Ori Adika – 209200559*
 
