@@ -28,9 +28,10 @@
   "author": "Ori Adika <oriadika10@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "aws-cdk-lib": "^2.206.0",
-    "constructs": "^10.4.2",
-    "@aws-cdk/aws-s3-deployment": "^1.203.0"
+    "aws-cdk-lib": "^2.87.0",
+  "constructs": "^10.0.0",
+    "aws-cdk-lib": "^2.87.0"
+
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.37.0",
